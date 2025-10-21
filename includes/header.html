@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ColmeiaTorrent - </title>
+
+    <link rel="icon" href="assets/images/favicon_io/favicon.ico" type="image/png">
+
+    <script src="https://kit.fontawesome.com/e415c13fd2.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+
+<body>
+
+    <header class="global-header">
+        <div class="container">
+            <a href="index.php" class="logo">
+                <img src="assets/images/ct-logotipo.png" alt="Logotipo ColmeiaTorrent">
+            </a>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.php">Início</a></li>
+                    <li class="dropdown">
+                        <a href="#">Categorias</a>
+                        <ul class="dropdown-menu">
+                        </ul>
+                    </li>
+
+                    <li><a href="sobre.php">Sobre</a></li>
+                    <li><a href="como-baixar.php">Como Baixar?</a></li>
+
+                </ul>
+            </nav>
+            <div class="header-actions">
+
+                <div class="search-container">
+                    <form action="index.php" method="GET" class="search-form">
+                        <input type="search" name="q" class="search-bar" placeholder="Buscar filmes...">
+
+                        <div id="live-search-results"></div>
+
+                        <button type="button" class="search-close-btn">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </form>
+                    <button class="search-toggle">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+                </div>
+                    <a href="painel/dashboard.php" class="admin-link">
+                        <i class="fa-solid fa-user-gear"></i>
+                    </a>
+
+            </div>
+            
+            <button class="hamburger-menu">
+                <i class="fa-solid fa-bars"></i> </button>
+        </div>
+    </header>
+
+    <main>

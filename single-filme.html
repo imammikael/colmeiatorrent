@@ -1,0 +1,61 @@
+<div class="container page-content">
+    
+        
+        <div class="movie-details-container">
+            <div class="movie-poster">
+                <img src="  htmlspecialchars(filme['capa_url']); " alt="Pôster de   htmlspecialchars(filme['titulo']); ">
+            </div>
+
+            
+
+            <div class="movie-info">
+                <h1> </h1>
+                    <button id="favorite-btn" class="btn-favorite   ja_e_favorito ? 'favorited' : ''; " data-filme-id="  filme['id']; " data-acao="  ja_e_favorito ? 'remover' : 'adicionar'; ">
+                        <span class="icon"><i class="fa-solid   ja_e_favorito ? 'fa-heart-circle-check' : 'fa-heart'; "></i></span>
+                        <span class="text">  </span>
+                    </button>
+                <p class="movie-sinopse">   </p>
+
+                <ul class="tech-specs">
+                    <li><strong>IMDb:</strong>    </li>
+                    <li><strong>Ano:</strong>    </li>
+                    <li><strong>Gênero:</strong> 
+                         
+                        
+                        
+                    </li>
+                    <li><strong>Formato:</strong>    </li>
+                    <li><strong>Qualidade:</strong>    </li>
+                    <li><strong>Áudio:</strong>    </li>
+                    <li><strong>Tamanho:</strong>    </li>
+                    <li><strong>Duração:</strong>    </li>
+                </ul>
+
+                <div class="download-buttons">
+                    <a href="  htmlspecialchars(filme['link_encurtado']); " target="_blank" class="btn-download primary">Download</a>
+                </div>
+
+            </div>
+        </div>
+
+         
+        <div class="trailer-section">
+            <h2>Trailer</h2>
+            <div class="video-container">
+                <iframe 
+                    src="  get_youtube_embed_url(filme['trailer_url']); " 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen>
+                </iframe>
+            </div>
+        </div>
+
+     
+        
+        <div class="error-message">
+            <h1>Filme não encontrado</h1>
+            <p>O filme que você está procurando não existe ou foi removido.</p>
+            <a href="index." class="btn-destaque">Voltar para a Página Inicial</a>
+        </div>
+</div>
