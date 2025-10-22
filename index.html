@@ -1,178 +1,33 @@
-<div class="hero-banner" id="hero-banner">
-    <div class="banner-media-wrapper">
-        <div class="banner-video-container">
-            <video id="banner-video-player" playsinline muted>
-                <source src="" type="video/mp4">
-                Seu navegador não suporta vídeos HTML5.
-            </video>
-        </div>
-
-        <div class="banner-image" style="background-image: url('<?php echo htmlspecialchars($banner_data['imagem_url']); ?>');"></div>
-    </div>
-
-    <div class="banner-overlay"></div>
-
-    <div class="banner-content container">
-        <h1></h1>
-        <p></p>
-        <a href="" class="btn-destaque">Ver Detalhes</a>
-    </div>
-
-    <div class="banner-controls">
-        <button id="volume-toggle-btn" class="control-btn">
-            <i class="fa-solid fa-volume-xmark"></i> 
-        </button>
-        <button id="replay-btn" class="control-btn" style="display: none;">
-            <i class="fa-solid fa-arrow-rotate-right"></i>
-        </button>
-    </div>
-</div>
-
-
-
-<div class="container page-content">
-
-    <h1 class="page-title"></h1>
-    <p style="color: var(--cor-texto-secundario); margin-top: -20px; margin-bottom: 30px;">
-        
-    </p>
-
-    <div class="filter-bar">
-        <form action="index.php" method="GET">
-            <input type="hidden" name="q" value="<?php echo htmlspecialchars($termo_busca); ?>">
-            <select name="genero">
-                <option value="">Filtrar por Gênero</option>
-                
-            </select>
-            <button type="submit" class="btn-submit">Filtrar</button>
-            <a href="index.php?q=<?php echo urlencode($termo_busca); ?>" class="btn-secondary">Limpar Filtro</a>
-        </form>
-    </div>
-
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ColmeiaTorrent - Seu Portal de Filmes</title>
     
-        <div class="shelf-grid">
-            
-                <a href="" class="movie-card">
-                    <img src="" alt="Pôster">
-                    <div class="card-overlay"><h3 class="card-title"></h3></div>
-                </a>
-            
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://kit.fontawesome.com/e415c13fd2.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="icon" href="assets/images/favicon_io/favicon.ico" type="image/png">
+</head>
+<body>
+    <div id="header-placeholder"></div>
+
+    <div id="home-content">
+        <div id="banner-placeholder"></div>
+        <div class="container page-content" id="prateleiras-container">
+            <p style="text-align: center; color: var(--cor-texto-secundario); padding: 50px 0;">Carregando...</p>
         </div>
-        
-        
-            <nav class="pagination">
-                <ul>
-                    
-                </ul>
-            </nav>
-        
-        <section class="content-shelf">';
-          <h2 class="shelf-title">' . . '</h2>';
-          <div class="shelf-grid">';
-        
-            <a href="single-filme.php?id=' . $filme['id'] . '" class="movie-card">';
-              <img src="' . htmlspecialchars($filme['capa_url']) . '" alt="Pôster de ' . htmlspecialchars($filme['titulo']) . '">';
-              <div class="card-overlay">';
-                  <h3 class="card-title">' . </h3>';
-              </div>';
-            </a>';
-        }
-          </div>';
-        </section>';
-</div>
+    </div>
 
-<script>
-// Só executa este script se o banner existir na página
-if (document.getElementById('hero-banner')) {
-    const player = document.getElementById('banner-video-player');
-    const volumeBtn = document.getElementById('volume-toggle-btn');
-    const replayBtn = document.getElementById('replay-btn');
-    const bannerImage = document.querySelector('.banner-image');
-    let volumeFadeInterval; // Variável para controlar nossa animação de fade
+    <div class="container page-content" id="search-results-container">
+        </div>
 
-    // --- NOVAS FUNÇÕES DE FADE IN/OUT ---
-    const fadeOutVolume = (onComplete) => {
-        clearInterval(volumeFadeInterval);
-        if (player.volume === 0) {
-            if (onComplete) onComplete();
-            return;
-        }
-        volumeFadeInterval = setInterval(() => {
-            const newVolume = Math.max(0, player.volume - 0.1);
-            player.volume = newVolume;
-            if (newVolume === 0) {
-                clearInterval(volumeFadeInterval);
-                if (onComplete) onComplete();
-            }
-        }, 50); // A cada 50ms, diminui o volume. Leva 0.5s para silenciar.
-    };
+    <div id="footer-placeholder"></div>
 
-    const fadeInVolume = () => {
-        clearInterval(volumeFadeInterval);
-        // Só faz o fade in se o usuário não tiver mutado explicitamente
-        if (player.muted || player.volume === 1) return; 
-        
-        volumeFadeInterval = setInterval(() => {
-            const newVolume = Math.min(1, player.volume + 0.1);
-            player.volume = newVolume;
-            if (newVolume === 1) {
-                clearInterval(volumeFadeInterval);
-            }
-        }, 50);
-    };
-    // --- FIM DAS NOVAS FUNÇÕES ---
-
-    // Eventos do player de vídeo
-    player.addEventListener('playing', () => {
-        bannerImage.style.opacity = '0';
-        volumeBtn.style.display = 'flex';
-        replayBtn.style.display = 'none';
-    });
-
-    player.addEventListener('ended', () => {
-        // A LINHA QUE FALTAVA: Faz a imagem de fundo reaparecer suavemente
-        bannerImage.style.opacity = '1';
-        
-        volumeBtn.style.display = 'none';
-        replayBtn.style.display = 'flex';
-    });
-
-    // Lógica dos botões de controle
-    volumeBtn.addEventListener('click', () => {
-        if (player.muted) {
-            player.muted = false;
-            player.volume = 1.0; // Garante que o volume volte ao máximo
-            volumeBtn.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
-        } else {
-            player.muted = true;
-            volumeBtn.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
-        }
-    });
-
-    replayBtn.addEventListener('click', () => {
-        player.currentTime = 0;
-        player.play();
-    });
-
-    // A mágica do Scroll com Intersection Observer
-    const banner = document.getElementById('hero-banner');
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (player) {
-                if (entry.isIntersecting) {
-                    // Se o banner está visível, toca o vídeo e inicia o fade in do som
-                    player.play();
-                    fadeInVolume();
-                } else {
-                    // Se não está visível, inicia o fade out e, AO TERMINAR, pausa o vídeo
-                    fadeOutVolume(() => {
-                        player.pause();
-                    });
-                }
-            }
-        });
-    }, { threshold: 0.5 }); // Ação acontece quando 50% do banner está visível
-
-    observer.observe(banner);
-}
-</script>
+    <script src="assets/js/main.js"></script>
+</body>
+</html>

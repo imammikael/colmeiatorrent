@@ -1,66 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Como Baixar - ColmeiaTorrent</title>
+    
+    <script src="https://kit.fontawesome.com/e415c13fd2.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <link rel="stylesheet" href="assets/css/style.css"> <link rel="stylesheet" href="assets/css/como-baixar.css"> <link rel="icon" href="assets/images/favicon_io/favicon.ico" type="image/png">
+</head>
+<body>
 
-
-<div class="container page-content">
-    <div class="about-header">
-        <h1 class="page-title">Como Baixar no ColmeiaTorrent</h1>
-        <p class="about-tagline">Siga nosso guia passo a passo para ter a melhor experiência.</p>
+    <div id="header-placeholder">
+        <header class="global-header">
+            <div class="container">
+                <a href="index.html" class="logo">
+                    <img src="assets/images/logo/logo.png" alt="Logotipo ColmeiaTorrent">
+                </a>
+                <nav class="main-nav">
+                    <ul>
+                        <li><a href="index.html">Início</a></li>
+                        <li class="dropdown">
+                            <a href="#">Categorias</a>
+                            <ul class="dropdown-menu" id="category-menu-placeholder">
+                                <li><a href="#">Carregando...</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="sobre.html">Sobre</a></li>
+                        <li><a href="como-baixar.html">Como Baixar</a></li>
+                    </ul>
+                </nav>
+                <div class="header-actions">
+                    <div class="search-container">
+                        <form action="index.html" method="GET" class="search-form">
+                            <input type="search" name="q" class="search-bar" placeholder="Buscar filmes...">
+                            <div id="live-search-results"></div>
+                            <button type="button" class="search-close-btn">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </form>
+                        <button class="search-toggle">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </button>
+                    </div>
+                </div>
+                <button class="hamburger-menu">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+            </div>
+        </header>
+        <main>
     </div>
 
-    <!-- Seção 1: Encurtador de Links -->
-    <section class="tutorial-section">
-        <h2>Passo 1: Navegando pelo Encurtador de Links</h2>
-        <p>Para manter o site funcionando, usamos um encurtador de links antes do download. É um processo rápido e simples. Veja como passar por ele no seu dispositivo:</p>
-        <div class="video-tutorial-grid">
-            <div class="video-tutorial-card">
-                <h3>No Computador (PC)</h3>
-                <div class="video-container">
-                    <!-- Substitua 'VIDEO_ID_PC' pelo ID real do seu vídeo do YouTube -->
-                    <iframe src="https://www.youtube.com/embed/JIXq5PuwyIo" frameborder="0" allowfullscreen></iframe>
-                </div>
-            </div>
-            <div class="video-tutorial-card">
-                <h3>No Celular (Mobile)</h3>
-                <div class="video-container">
-                    <!-- Substitua 'VIDEO_ID_CELULAR' pelo ID real do seu vídeo do YouTube -->
-                    <iframe src="https://www.youtube.com/embed/9wOSaUT7hcI" frameborder="0" allowfullscreen></iframe>
-                </div>
-            </div>
+    <div class="container page-content">
+        <div class="about-header">
+            <h1 class="page-title">Como Baixar no ColmeiaTorrent</h1>
+            <p class="about-tagline">Siga nosso guia passo a passo para ter a melhor experiência.</p>
         </div>
-    </section>
-
-    <!-- Seção 2: Programas Necessários -->
-    <section class="tutorial-section">
-        <h2>Passo 2: O Programa Certo para Baixar</h2>
-        <p>Nossos filmes são compartilhados via link magnético (torrent). Você precisará de um programa cliente de torrent instalado para gerenciá-los. Escolha a opção para seu dispositivo:</p>
         
-        <div class="download-grid">
-            <!-- Card para PC -->
-            <div class="download-card">
-                <div class="download-icon"><i class="fa-solid fa-desktop"></i></div>
-                <h3>Para Computador (Windows)</h3>
-                <p>Recomendamos o <strong>uTorrent Classic</strong>, um programa leve, rápido e confiável para gerenciar seus downloads de torrents.</p>
-                <ol class="instructions-list">
-                    <li>Clique no botão abaixo para baixar o instalador.</li>
-                    <li>Execute o arquivo e siga as instruções de instalação (cuidado para desmarcar ofertas de softwares adicionais).</li>
-                    <li>Após instalar, os links magnéticos do site abrirão automaticamente nele.</li>
-                </ol>
-                <a href="https://www.utorrent.com/intl/pt_br/downloads/complete/track/stable/os/win/" target="_blank" class="btn-submit">Baixar uTorrent Classic</a>
-            </div>
-
-            <!-- Card para Celular -->
-            <div class="download-card">
-                <div class="download-icon"><i class="fa-solid fa-mobile-screen-button"></i></div>
-                <h3>Para Celular (Android)</h3>
-                <p>Um dos melhores e mais confiáveis aplicativos para baixar torrents no celular é o <strong>Flud - Torrent Downloader</strong>.</p>
-                <ol class="instructions-list">
-                    <li>Clique no botão abaixo para ir para a Google Play Store.</li>
-                    <li>Instale o aplicativo como qualquer outro.</li>
-                    <li>Ao clicar em um link magnético no site, seu celular perguntará se você quer abrir com o Flud. Escolha "Sempre".</li>
-                </ol>
-                <a href="https://play.google.com/store/apps/details?id=com.delphicoder.flud" target="_blank" class="btn-submit">
-                    <i class="fa-brands fa-google-play"></i> Baixar Flud na Play Store
-                </a>
-            </div>
+        <div class="tutorial-page-wrapper">
+            <section class="tutorial-section">
+                <h2>Passo 1: Navegando pelo Encurtador de Links</h2>
+                <p>Para manter o site funcionando, usamos um encurtador de links antes do download. É um processo rápido e simples. Veja como passar por ele no seu dispositivo:</p>
+                <div class="video-tutorial-grid">
+                    <div class="video-tutorial-card">
+                        <h3>No Computador (PC)</h3>
+                        <div class="video-container">
+                            <iframe src="https://www.youtube.com/embed/JIXq5PuwyIo" frameborder="0" allowfullscreen></iframe>
+                        </div>
+                    </div>
+                    <div class="video-tutorial-card">
+                        <h3>No Celular (Mobile)</h3>
+                        <div class="video-container">
+                            <iframe src="https://www.youtube.com/embed/9wOSaUT7hcI" frameborder="0" allowfullscreen></iframe>
+                        </div>
+                    </div>
+                </div>
+            </section>
+    
+            <section class="tutorial-section">
+                <h2>Passo 2: O Programa Certo para Baixar</h2>
+                <p>Nossos filmes são compartilhados via link magnético (torrent). Você precisará de um programa cliente de torrent instalado para gerenciá-los. Escolha a opção para seu dispositivo:</p>
+                <div class="download-grid">
+                    <div class="download-card">
+                        <div class="download-icon"><i class="fa-solid fa-desktop"></i></div>
+                        <h3>Para Computador (Windows)</h3>
+                        <p>Recomendamos o <strong>uTorrent Classic</strong>, um programa leve, rápido e confiável para gerenciar seus downloads de torrents.</p>
+                        <ol class="instructions-list">
+                            <li>Clique no botão abaixo para baixar o instalador.</li>
+                            <li>Execute o arquivo e siga as instruções de instalação.</li>
+                            <li>Após instalar, os links magnéticos do site abrirão automaticamente nele.</li>
+                        </ol>
+                        <a href="https://www.utorrent.com/downloads/complete/track/stable/os/win/" target="_blank" class="btn-submit">Baixar uTorrent Classic</a>
+                    </div>
+                    <div class="download-card">
+                        <div class="download-icon"><i class="fa-solid fa-mobile-screen-button"></i></div>
+                        <h3>Para Celular (Android)</h3>
+                        <p>Um dos melhores e mais confiáveis aplicativos para baixar torrents no celular é o <strong>Flud - Torrent Downloader</strong>.</p>
+                        <ol class="instructions-list">
+                            <li>Clique no botão abaixo para ir para a Google Play Store.</li>
+                            <li>Instale o aplicativo como qualquer outro.</li>
+                            <li>Ao clicar em um link magnético no site, seu celular perguntará se você quer abrir com o Flud.</li>
+                        </ol>
+                        <a href="https://play.google.com/store/apps/details?id=com.delphicoder.flud" target="_blank" class="btn-submit">
+                            <i class="fa-brands fa-google-play"></i> Baixar Flud na Play Store
+                        </a>
+                    </div>
+                </div>
+            </section>
         </div>
-    </section>
-</div>
+    </div>
+    <div id="footer-placeholder">
+        <footer class="global-footer">
+            </footer>
+        <a href="#" id="back-to-top-btn" class="back-to-top">
+            <i class="fa-solid fa-arrow-up"></i>
+        </a>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/main.js"></script>
+</body>
+</html>

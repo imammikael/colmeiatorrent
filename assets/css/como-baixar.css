@@ -1,0 +1,96 @@
+/* --- Estilos Dedicados para a Página "Como Baixar" --- */
+
+/* Garante que o container principal ocupe a tela e centralize o conteúdo */
+.tutorial-page-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centraliza todo o conteúdo horizontalmente */
+    gap: 60px; /* Espaço entre as seções */
+}
+
+.tutorial-section {
+    width: 100%;
+    max-width: 1000px; /* Largura máxima para o conteúdo */
+    text-align: center; /* Centraliza o texto dentro das seções */
+}
+
+.tutorial-section h2 {
+    font-size: 1.8rem;
+    color: var(--cor-destaque);
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    display: inline-block;
+    border-bottom: 2px solid var(--cor-borda);
+}
+
+.tutorial-section > p {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: var(--cor-texto-principal);
+    margin-bottom: 40px;
+    max-width: 750px; /* Limita a largura do parágrafo para melhor leitura */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.video-tutorial-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+.video-tutorial-card h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+.download-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+.download-card {
+    background-color: var(--cor-fundo-secundaria);
+    padding: 30px;
+    border-radius: 8px;
+    border-left: 5px solid var(--cor-destaque);
+    text-align: center; /* Centraliza o conteúdo do card */
+}
+
+.download-icon {
+    font-size: 2.5rem;
+    color: var(--cor-destaque);
+    margin-bottom: 15px;
+}
+
+.download-card h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+.download-card > p {
+    color: var(--cor-texto-secundario);
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+.instructions-list {
+    margin-bottom: 30px;
+    padding-left: 0;
+    list-style-position: inside; /* Mantém os números alinhados no centro */
+    text-align: left; /* Deixa a lista em si alinhada à esquerda para legibilidade */
+    display: inline-block; /* Permite que o bloco da lista seja centralizado */
+}
+
+.instructions-list li {
+    margin-bottom: 10px;
+}
+
+.download-card .btn-submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: auto;
+}

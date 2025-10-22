@@ -1,48 +1,31 @@
-<div class="container page-content">
-     
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carregando Gênero... - ColmeiaTorrent</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://kit.fontawesome.com/e415c13fd2.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="icon" href="assets/images/favicon_io/favicon.ico" type="image/png">
+</head>
+<body>
+    <div id="header-placeholder"></div>
 
-        <h1 class="page-title">Gênero:    </h1>
-
-        
-            
-            <div class="shelf-grid">
-                 
-                    <a href=" " class="movie-card">
-                        <img src="   " alt="Pôster de   htmlspecialchars(filme['titulo']); ">
-                        <div class="card-overlay">
-                            <h3 class="card-title">   </h3>
-                        </div>
-                    </a>
-
-            </div>
-            
-             
-                <nav class="pagination">
-                    <ul>
-                         
-                            <li><a href="arquivo-genero.php?slug=  slug_genero; &pagina=  pagina_atual - 1; ">&laquo; Anterior</a></li>
-                         
-
-                         
-                            <li class=" if (i == pagina_atual)  'active'; ">
-                                <a href="arquivo-genero.php?slug=  slug_genero; &pagina=  i; ">  i; </a>
-                            </li>
-
-                            <li><a href="arquivo-genero.php?slug=  slug_genero; &pagina=  pagina_atual + 1; ">Próximo &raquo;</a></li>
-                         
-                    </ul>
-                </nav>
-             
-
-            <p>Nenhum filme encontrado para este gênero ainda.</p>
-         
-
-
-        
-        <div class="error-message">
-            <h1>Gênero não encontrado</h1>
-            <p>A categoria que você está procurando não existe.</p>
-            <a href="index.php" class="btn-destaque">Voltar para a Página Inicial</a>
+    <div class="container page-content">
+        <div id="archive-content-placeholder">
+            <p style="text-align: center; color: var(--cor-texto-secundario); font-size: 1.2rem; padding: 50px 0;">
+                Carregando filmes do gênero...
+            </p>
         </div>
+    </div>
 
-</div>
+    <div id="footer-placeholder"></div>
+
+    <script src="assets/js/main.js"></script>
+</body>
+</html>
