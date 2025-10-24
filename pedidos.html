@@ -10,10 +10,18 @@
     <script src="https://kit.fontawesome.com/e415c13fd2.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <link rel="stylesheet" href="assets/css/style.css">
+    
+    <link rel="stylesheet" href="assets/css/pedidos.css"> 
+    
     <link rel="icon" href="assets/images/favicon_io/favicon.ico" type="image/png">
 </head>
 <body>
-    <div id="header-placeholder"></div>
+
+    <div id="header-placeholder">
+        <header class="global-header">
+            </header>
+        <main>
+    </div>
 
     <div class="container page-content">
         <div class="about-header">
@@ -21,11 +29,35 @@
             <p class="about-tagline">Quer um filme que não encontrou? Deixe seu pedido abaixo!</p>
         </div>
 
-        <div id="pedidos-content-placeholder">
-            </div>
+        <div class="pedidos-form-container">
+            <form name="pedidos" method="POST" data-netlify="true">
+                
+                <div class="form-group">
+                    <label for="nome">Seu Nome (Opcional)</label>
+                    <input type="text" id="nome" name="nome">
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Seu E-mail (Obrigatório)</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="pedido">Seu Pedido (Filme e Ano)</label>
+                    <textarea id="pedido" name="pedido" rows="5" required></textarea>
+                </div>
+                
+                <button type="submit" class="btn-submit">Enviar Pedido</button>
+            </form>
+        </div>
     </div>
-
-    <div id="footer-placeholder"></div>
+    <div id="footer-placeholder">
+        <footer class="global-footer">
+            </footer>
+        <a href="#" id="back-to-top-btn" class="back-to-top">
+            <i class="fa-solid fa-arrow-up"></i>
+        </a>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="assets/js/main.js"></script>
