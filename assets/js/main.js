@@ -63,6 +63,10 @@ function loadPageContent() {
     else if (path === 'arquivo-genero.html') {
         loadArquivoGeneroContent();
     }
+    // ADICIONE ESTA NOVA CONDIÇÃO
+    else if (path === 'pedidos.html') {
+        loadPedidosPage();
+    }
 }
 
 /**
@@ -401,6 +405,126 @@ function formatarDuracao(total_minutos) {
     if (horas > 0) { resultado += `${horas}h`; }
     if (minutos > 0) { if (horas > 0) { resultado += ' '; } resultado += `${minutos}min`; }
     return resultado;
+}
+
+/**
+ * Carrega o formulário e a lista de pedidos
+ */
+async function loadPedidosPage() {
+    const contentPlaceholder = document.getElementById('pedidos-content-placeholder');
+    if (!contentPlaceholder) return;
+
+    // 1. "Desenha" o layout estático da página (formulário e container da lista)
+    contentPlaceholder.innerHTML = `
+        <div class="pedidos-form-container">
+            <form id="pedido-form">
+                <div class="form-group">
+                    <label for="nome_usuario">Seu Nome</label>
+                    <input type="text" id="nome_usuario" name="nome_usuario" required>
+                </div>
+                <div class="form-group">
+                    <label for="pedido_filme">Nome do Filme (e ano, se souber)</label>
+                    <input type="text" id="pedido_filme" name="pedido_filme" required>
+                </div>
+                <button type="submit" class="btn-submit" id="pedido-submit-btn">Enviar Pedido</button>
+            </form>
+            <div id="pedido-feedback" class="feedback-message" style="display: none;"></div>
+        </div>
+
+        <section class="pedidos-list-container">
+            <h2>Pedidos Recentes</h2>
+            <div id="pedidos-list">
+                <p>Carregando pedidos...</p>
+            </div>
+        </section>
+    `;
+
+    // 2. Adiciona o "ouvinte" de envio ao formulário
+    const pedidoForm = document.getElementById('pedido-form');
+    const submitButton = document.getElementById('pedido-submit-btn');
+    const feedback = document.getElementById('pedido-feedback');
+
+    pedidoForm.addEventListener('submit', async (event) => {
+        event.preventDefault(); // Impede o recarregamento da página
+        submitButton.disabled = true;
+        submitButton.textContent = 'Enviando...';
+
+        const formData = new FormData(pedidoForm);
+        const nome = formData.get('nome_usuario');
+        const pedido = formData.get('pedido_filme');
+
+        // Insere os dados no Supabase
+        const { error } = await supabase
+            .from('pedidos')
+            .insert({ nome_usuario: nome, pedido_filme: pedido });
+
+        if (error) {
+            console.error('Erro ao enviar pedido:', error);
+            feedback.textContent = 'Erro ao enviar pedido. Tente novamente.';
+            feedback.className = 'feedback-message error';
+            feedback.style.display = 'block';
+            submitButton.disabled = false;
+            submitButton.textContent = 'Enviar Pedido';
+        } else {
+            feedback.textContent = 'Pedido enviado com sucesso!';
+            feedback.className = 'feedback-message success';
+            feedback.style.display = 'block';
+            submitButton.disabled = false;
+            pedidoForm.reset();
+            // Recarrega a lista de pedidos para mostrar o novo
+            fetchAndDisplayRequests(); 
+        }
+    });
+
+    // 3. Busca e exibe os pedidos existentes
+    fetchAndDisplayRequests();
+}
+
+/**
+ * Busca e "desenha" a lista de pedidos
+ */
+async function fetchAndDisplayRequests() {
+    const listContainer = document.getElementById('pedidos-list');
+    if (!listContainer) return;
+
+    // Busca os 25 pedidos mais recentes
+    const { data: pedidos, error } = await supabase
+        .from('pedidos')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(25);
+
+    if (error) {
+        console.error('Erro ao buscar pedidos:', error);
+        listContainer.innerHTML = '<p>Não foi possível carregar os pedidos.</p>';
+        return;
+    }
+
+    if (pedidos.length === 0) {
+        listContainer.innerHTML = '<p>Nenhum pedido feito ainda. Seja o primeiro!</p>';
+        return;
+    }
+
+    // "Desenha" o HTML da lista
+    listContainer.innerHTML = ''; // Limpa a mensagem "Carregando..."
+    pedidos.forEach(pedido => {
+        const pedidoItem = document.createElement('div');
+        pedidoItem.className = 'pedido-item';
+        
+        // Formata a data (ex: 24/10/2025)
+        const dataFormatada = new Date(pedido.created_at).toLocaleDateString('pt-BR');
+        
+        pedidoItem.innerHTML = `
+            <div class="pedido-header">
+                <span class="pedido-author"><i class="fa-solid fa-user"></i> ${htmlspecialchars(pedido.nome_usuario)}</span>
+                <span class="pedido-date">${dataFormatada}</span>
+            </div>
+            <div class="pedido-body">
+                <p>${htmlspecialchars(pedido.pedido_filme)}</p>
+            </div>
+        `;
+        listContainer.appendChild(pedidoItem);
+    });
 }
 
 /**
