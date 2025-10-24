@@ -407,9 +407,7 @@ function formatarDuracao(total_minutos) {
     return resultado;
 }
 
-/**
- * Carrega o formulário e a lista de pedidos
- */
+// --- A NOVA FUNÇÃO PARA A PÁGINA DE PEDIDOS ---
 async function loadPedidosPage() {
     const contentPlaceholder = document.getElementById('pedidos-content-placeholder');
     if (!contentPlaceholder) return;
@@ -430,11 +428,10 @@ async function loadPedidosPage() {
             </form>
             <div id="pedido-feedback" class="feedback-message" style="display: none;"></div>
         </div>
-
         <section class="pedidos-list-container">
             <h2>Pedidos Recentes</h2>
             <div id="pedidos-list">
-                <p>Carregando pedidos...</p>
+                <p style="text-align: center; color: var(--cor-texto-secundario);">Carregando pedidos...</p>
             </div>
         </section>
     `;
@@ -445,7 +442,7 @@ async function loadPedidosPage() {
     const feedback = document.getElementById('pedido-feedback');
 
     pedidoForm.addEventListener('submit', async (event) => {
-        event.preventDefault(); // Impede o recarregamento da página
+        event.preventDefault();
         submitButton.disabled = true;
         submitButton.textContent = 'Enviando...';
 
@@ -453,7 +450,6 @@ async function loadPedidosPage() {
         const nome = formData.get('nome_usuario');
         const pedido = formData.get('pedido_filme');
 
-        // Insere os dados no Supabase
         const { error } = await supabase
             .from('pedidos')
             .insert({ nome_usuario: nome, pedido_filme: pedido });
@@ -471,7 +467,6 @@ async function loadPedidosPage() {
             feedback.style.display = 'block';
             submitButton.disabled = false;
             pedidoForm.reset();
-            // Recarrega a lista de pedidos para mostrar o novo
             fetchAndDisplayRequests(); 
         }
     });
@@ -487,7 +482,6 @@ async function fetchAndDisplayRequests() {
     const listContainer = document.getElementById('pedidos-list');
     if (!listContainer) return;
 
-    // Busca os 25 pedidos mais recentes
     const { data: pedidos, error } = await supabase
         .from('pedidos')
         .select('*')
@@ -499,21 +493,16 @@ async function fetchAndDisplayRequests() {
         listContainer.innerHTML = '<p>Não foi possível carregar os pedidos.</p>';
         return;
     }
-
     if (pedidos.length === 0) {
-        listContainer.innerHTML = '<p>Nenhum pedido feito ainda. Seja o primeiro!</p>';
+        listContainer.innerHTML = '<p style="text-align: center; color: var(--cor-texto-secundario);">Nenhum pedido feito ainda. Seja o primeiro!</p>';
         return;
     }
 
-    // "Desenha" o HTML da lista
-    listContainer.innerHTML = ''; // Limpa a mensagem "Carregando..."
+    listContainer.innerHTML = ''; 
     pedidos.forEach(pedido => {
         const pedidoItem = document.createElement('div');
         pedidoItem.className = 'pedido-item';
-        
-        // Formata a data (ex: 24/10/2025)
         const dataFormatada = new Date(pedido.created_at).toLocaleDateString('pt-BR');
-        
         pedidoItem.innerHTML = `
             <div class="pedido-header">
                 <span class="pedido-author"><i class="fa-solid fa-user"></i> ${htmlspecialchars(pedido.nome_usuario)}</span>
@@ -526,6 +515,7 @@ async function fetchAndDisplayRequests() {
         listContainer.appendChild(pedidoItem);
     });
 }
+// --- FIM DA NOVA FUNÇÃO ---
 
 /**
  * Busca e desenha a página de um gênero específico, com paginação
