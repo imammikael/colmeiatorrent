@@ -1378,14 +1378,3 @@ body.header-is-sticky .global-header {
     /* COMO VOCÊ PEDIU: SEM ANIMAÇÃO DE ENTRADA */
     animation: none; 
 }
-
-/* --- Feedback do Formulário --- */
-.feedback-message { 
-    padding: 10px; 
-    margin-top: 15px; 
-    border-radius: 5px; 
-    font-weight: bold;
-    text-align: center;
-}
-.feedback-message.error { color: #c94a4a; background-color: rgba(201, 74, 74, 0.1); }
-.feedback-message.success { color: lightgreen; background-color: rgba(144, 238, 144, 0.1); }
