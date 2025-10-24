@@ -63,9 +63,10 @@ function loadPageContent() {
     else if (path === 'arquivo-genero.html') {
         loadArquivoGeneroContent();
     }
-    // ADICIONE ESTA NOVA CONDIÇÃO
-    else if (path === 'pedidos.html') {
-        loadPedidosPage();
+
+    // ADICIONADO: Verifica se estamos na página de pedidos para ativar o formulário
+    if (path === 'pedidos.html') {
+        initPedidosForm();
     }
 }
 
@@ -890,6 +891,61 @@ function initBannerJavaScript() {
         });
     }, { threshold: 0.5 });
     observer.observe(banner);
+}
+
+/**
+ * Inicializa o formulário de pedidos com 'mailto:'
+ */
+function initPedidosForm() {
+    const form = document.getElementById('pedidos-form');
+    const feedback = document.getElementById('form-feedback');
+    if (!form || !feedback) return; // Sai se o formulário não existir
+
+    form.addEventListener('submit', function(event) {
+        event.preventDefault(); // Impede o envio normal do formulário
+
+        try {
+            // Pega os dados do formulário
+            const nome = form.elements['nome'].value;
+            const email = form.elements['email'].value;
+            const pedido = form.elements['pedido'].value;
+
+            // 1. Constrói o corpo do e-mail
+            const body = `
+                Um novo pedido foi feito no ColmeiaTorrent:
+                ------------------------------------------
+                Nome: ${nome || 'Não preenchido'}
+                E-mail do Solicitante: ${email}
+
+                Pedido:
+                ${pedido}
+                ------------------------------------------
+            `;
+
+            // 2. Constrói o link 'mailto:' dinamicamente
+            //    (Isso esconde o seu e-mail de bots de spam)
+            const emailAdmin = 'colmeiatorrent' + '@' + 'gmail.com';
+            const subject = 'Novo Pedido de Filme: ' + pedido.substring(0, 30) + '...';
+
+            // 3. Cria o link e abre o cliente de e-mail do usuário
+            const mailtoLink = `mailto:${emailAdmin}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+            // Tenta abrir o cliente de e-mail
+            window.location.href = mailtoLink;
+
+            // 4. Dá um feedback imediato ao usuário
+            form.reset();
+            feedback.textContent = 'Obrigado! Seu cliente de e-mail será aberto para você enviar o pedido.';
+            feedback.className = 'feedback-message success';
+            feedback.style.display = 'block';
+
+        } catch (error) {
+            console.error('Erro no formulário mailto:', error);
+            feedback.textContent = 'Ocorreu um erro. Tente novamente.';
+            feedback.className = 'feedback-message error';
+            feedback.style.display = 'block';
+        }
+    });
 }
 
 /**
