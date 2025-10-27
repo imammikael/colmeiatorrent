@@ -601,7 +601,7 @@ async function loadSingleSerieContent() {
                         <li><strong>Tamanho:</strong> ${serie.tamanho || 'N/A'}</li>
                     </ul>
                     <div class="download-buttons">
-                        <a href="${serie.link_encurtado}" target="_blank" class="btn-download primary">Download (Encurtado)</a>
+                        <a href="${serie.link_encurtado}" target="_blank" class="btn-download primary">Download</a>
                     </div>
                 </div>
             </div>
