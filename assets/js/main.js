@@ -552,48 +552,6 @@ async function loadSingleSerieContent() {
         return;
     }
 
-    // Busca a série E seus gêneros relacionados
-    const { data: serie, error } = await supabase
-        .from('series')
-        .select(`
-            *,
-            generos ( id, nome, slug )
-        `)
-        .eq('id', serieId)
-        .single();
-
-    if (error || !serie) {
-        console.error('Erro ao buscar detalhes da série:', error);
-        contentPlaceholder.innerHTML = `<div class="error-message"><h1>Série não encontrada</h1></div>`;
-        return;
-    }
-
-    // Busca Séries Semelhantes (lógica idêntica à de filmes)
-    let seriesSemelhantesHTML = '';
-    if (serie.generos && serie.generos.length > 0) {
-        const primeiroGeneroId = serie.generos[0].id;
-        const { data: semelhantes } = await supabase
-            .from('serie_genero')
-            .select(`series ( id, titulo, capa_url )`)
-            .eq('genero_id', primeiroGeneroId)
-            .neq('serie_id', serieId)
-            .limit(6);
-        
-        if (semelhantes && semelhantes.length > 0) {
-            for (const item of semelhantes) {
-                const sem = item.series; 
-                if(sem) {
-                    seriesSemelhantesHTML += `
-                        <a href="single-serie.html?id=${sem.id}" class="sidebar-movie-item">
-                            <img src="${sem.capa_url}" alt="Pôster de ${sem.titulo}">
-                            <div class="sidebar-movie-title">${sem.titulo}</div>
-                        </a>
-                    `;
-                }
-            }
-        }
-    }
-
     const generosHTML = serie.generos.map(g => `<a href="arquivo-genero-serie.html?slug=${g.slug}">${g.nome}</a>`).join(', ');
     const sinopseHTML = serie.sinopse ? serie.sinopse.replace(/\n/g, '<br>') : 'Sinopse não disponível.';
     const trailerHTML = serie.trailer_url ? `
@@ -607,7 +565,6 @@ async function loadSingleSerieContent() {
 
     // "Desenha" o HTML final
     const serieHTML = `
-        <div class="main-and-sidebar-container">
             <div class="main-content">
                 <div class="movie-details-container">
                     <div class="movie-poster">
@@ -631,13 +588,6 @@ async function loadSingleSerieContent() {
                     </div>
                 </div>
             </div>
-            <aside class="sidebar">
-                <h3 class="sidebar-title">Séries Semelhantes</h3>
-                <div class="sidebar-movie-list">
-                    ${seriesSemelhantesHTML || '<p style="color: var(--cor-texto-secundario);">Nenhuma série semelhante encontrada.</p>'}
-                </div>
-            </aside>
-        </div>
         ${trailerHTML}
     `;
     
