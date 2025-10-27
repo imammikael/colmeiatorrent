@@ -507,7 +507,7 @@ async function loadArquivoGeneroSerieContent() {
         return;
     }
 
-    let html = `<h1 class="page-title">Gênero: ${genero.nome} (Séries)</h1>`;
+    let html = `<h1 class="page-title">Gênero: ${genero.nome}</h1>`;
 
     if (seriesData && seriesData.length > 0) {
         const series = seriesData.map(item => item.series).filter(Boolean);
