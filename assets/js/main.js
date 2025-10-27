@@ -60,7 +60,7 @@ function loadPageContent() {
         loadSingleFilmeContent();
     }
     // ADICIONE ESTA NOVA CONDIÇÃO
-    else if (path === 'arquivo-genero.html') {
+    else if (path === 'arquivo-genero-filme.html') {
         loadArquivoGeneroContent();
     }
     
