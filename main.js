@@ -538,7 +538,7 @@ async function loadArquivoGeneroSerieContent() {
 }
 
 /**
- * Busca os detalhes de uma SÉRIE específica e desenha a página (SEM SIDEBAR)
+ * Busca os detalhes de uma SÉRIE específica e desenha a página
  */
 async function loadSingleSerieContent() {
     const contentPlaceholder = document.getElementById('serie-details-content-placeholder');
@@ -552,24 +552,6 @@ async function loadSingleSerieContent() {
         return;
     }
 
-    // Busca a série E seus gêneros relacionados
-    const { data: serie, error } = await supabase
-        .from('series')
-        .select(`
-            *,
-            generos ( id, nome, slug )
-        `)
-        .eq('id', serieId)
-        .single();
-
-    if (error || !serie) {
-        console.error('Erro ao buscar detalhes da série:', error);
-        contentPlaceholder.innerHTML = `<div class="error-message"><h1>Série não encontrada</h1></div>`;
-        return;
-    }
-
-    // --- LÓGICA DA SIDEBAR REMOVIDA ---
-
     const generosHTML = serie.generos.map(g => `<a href="arquivo-genero-serie.html?slug=${g.slug}">${g.nome}</a>`).join(', ');
     const sinopseHTML = serie.sinopse ? serie.sinopse.replace(/\n/g, '<br>') : 'Sinopse não disponível.';
     const trailerHTML = serie.trailer_url ? `
@@ -581,31 +563,31 @@ async function loadSingleSerieContent() {
         </div>
     ` : '';
 
-    // "Desenha" o HTML final (SEM O LAYOUT DE SIDEBAR)
+    // "Desenha" o HTML final
     const serieHTML = `
-        <div class="main-content">
-            <div class="movie-details-container">
-                <div class="movie-poster">
-                    <img src="${serie.capa_url}" alt="Pôster de ${serie.titulo}">
-                </div>
-                <div class="movie-info">
-                    <h1>${serie.titulo}</h1>
-                    <p class="movie-sinopse">${sinopseHTML}</p>
-                    <ul class="tech-specs">
-                        <li><strong>IMDb:</strong> ${serie.imdb_rating || 'N/A'}</li>
-                        <li><strong>Ano:</strong> ${serie.ano_lancamento || 'N/A'}</li>
-                        <li><strong>Gênero:</strong> ${generosHTML || 'N/A'}</li>
-                        <li><strong>Formato:</strong> ${serie.formato || 'N/A'}</li>
-                        <li><strong>Qualidade:</strong> ${serie.qualidade || 'N/A'}</li>
-                        <li><strong>Áudio:</strong> ${serie.audio || 'N/A'}</li>
-                        <li><strong>Tamanho:</strong> ${serie.tamanho || 'N/A'}</li>
-                    </ul>
-                    <div class="download-buttons">
-                        <a href="${serie.link_encurtado}" target="_blank" class="btn-download primary">Download (Encurtado)</a>
+            <div class="main-content">
+                <div class="movie-details-container">
+                    <div class="movie-poster">
+                        <img src="${serie.capa_url}" alt="Pôster de ${serie.titulo}">
+                    </div>
+                    <div class="movie-info">
+                        <h1>${serie.titulo}</h1>
+                        <p class="movie-sinopse">${sinopseHTML}</p>
+                        <ul class="tech-specs">
+                            <li><strong>IMDb:</strong> ${serie.imdb_rating || 'N/A'}</li>
+                            <li><strong>Ano:</strong> ${serie.ano_lancamento || 'N/A'}</li>
+                            <li><strong>Gênero:</strong> ${generosHTML || 'N/A'}</li>
+                            <li><strong>Formato:</strong> ${serie.formato || 'N/A'}</li>
+                            <li><strong>Qualidade:</strong> ${serie.qualidade || 'N/A'}</li>
+                            <li><strong>Áudio:</strong> ${serie.audio || 'N/A'}</li>
+                            <li><strong>Tamanho:</strong> ${serie.tamanho || 'N/A'}</li>
+                        </ul>
+                        <div class="download-buttons">
+                            <a href="${serie.link_encurtado}" target="_blank" class="btn-download primary">Download (Encurtado)</a>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
         ${trailerHTML}
     `;
     
