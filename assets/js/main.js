@@ -61,12 +61,14 @@ function loadPageContent() {
     }
     // ADICIONE ESTA NOVA CONDIÇÃO
     else if (path === 'arquivo-genero-filme.html') {
-        loadArquivoGeneroContent();
+        loadArquivoGeneroFilmeContent();
     }
-    
-    // ADICIONADO: Verifica se estamos na página de pedidos para ativar o formulário
-    if (path === 'pedidos.html') {
-        initPedidosForm();
+    // --- NOVAS ROTAS PARA SÉRIES ---
+    else if (path === 'arquivo-genero-serie.html') {
+        loadArquivoGeneroSerieContent();
+    }
+    else if (path === 'single-serie.html') {
+        loadSingleSerieContent();
     }
 }
 
@@ -447,9 +449,206 @@ function formatarDuracao(total_minutos) {
 }
 
 /**
+ * Busca e desenha a página de um GÊNERO DE SÉRIE específico, com paginação
+ */
+async function loadArquivoGeneroSerieContent() {
+    const contentPlaceholder = document.getElementById('archive-serie-content-placeholder');
+    if (!contentPlaceholder) return;
+    contentPlaceholder.innerHTML = `<p style="text-align: center; color: var(--cor-texto-secundario);">Carregando séries do gênero...</p>`;
+
+    const params = new URLSearchParams(window.location.search);
+    const slug = params.get('slug');
+    const currentPage = parseInt(params.get('pagina') || '1', 10);
+    const seriesPorPagina = 18;
+    const offset = (currentPage - 1) * seriesPorPagina;
+
+    if (!slug) {
+        contentPlaceholder.innerHTML = `<div class="error-message"><h1>Gênero não encontrado</h1></div>`;
+        return;
+    }
+
+    const { data: genero, error: generoError } = await supabase
+        .from('generos')
+        .select('id, nome')
+        .eq('slug', slug)
+        .single();
+
+    if (generoError || !genero) {
+        contentPlaceholder.innerHTML = `<div class="error-message"><h1>Gênero não encontrado</h1></div>`;
+        return;
+    }
+
+    document.title = `ColmeiaTorrent - Gênero: ${genero.nome}`;
+    
+    const { count, error: countError } = await supabase
+        .from('serie_genero')
+        .select('serie_id', { count: 'exact', head: true })
+        .eq('genero_id', genero.id);
+
+    if (countError) {
+        contentPlaceholder.innerHTML = `<div class="error-message"><h1>Erro ao contar séries</h1></div>`;
+        return;
+    }
+    
+    const totalSeries = count || 0;
+    const totalPaginas = Math.ceil(totalSeries / seriesPorPagina);
+
+    const { data: seriesData, error: seriesError } = await supabase
+        .from('serie_genero')
+        .select(`
+            series ( id, titulo, capa_url )
+        `)
+        .eq('genero_id', genero.id)
+        .order('id', { foreignTable: 'series', ascending: false })
+        .range(offset, offset + seriesPorPagina - 1);
+
+    if (seriesError) {
+        contentPlaceholder.innerHTML = `<div class="error-message"><h1>Erro ao buscar séries</h1></div>`;
+        return;
+    }
+
+    let html = `<h1 class="page-title">Gênero: ${genero.nome} (Séries)</h1>`;
+
+    if (seriesData && seriesData.length > 0) {
+        const series = seriesData.map(item => item.series).filter(Boolean);
+        
+        html += '<div class="shelf-grid">';
+        for (const serie of series) {
+            html += `
+                <a href="single-serie.html?id=${serie.id}" class="movie-card">
+                    <img src="${serie.capa_url}" alt="Pôster de ${serie.titulo}">
+                    <div class="card-overlay"><h3 class="card-title">${serie.titulo}</h3></div>
+                </a>
+            `;
+        }
+        html += '</div>';
+
+        if (totalPaginas > 1) {
+            html += '<nav class="pagination"><ul>';
+            const baseUrl = `arquivo-genero-serie.html?slug=${slug}`;
+            if (currentPage > 1) { html += `<li><a href="${baseUrl}&pagina=${currentPage - 1}">&laquo; Anterior</a></li>`; }
+            for (let i = 1; i <= totalPaginas; i++) { html += `<li class="${i === currentPage ? 'active' : ''}"><a href="${baseUrl}&pagina=${i}">${i}</a></li>`; }
+            if (currentPage < totalPaginas) { html += `<li><a href="${baseUrl}&pagina=${currentPage + 1}">Próximo &raquo;</a></li>`; }
+            html += '</ul></nav>';
+        }
+    } else {
+        html += '<p style="text-align: center; color: var(--cor-texto-secundario);">Nenhuma série encontrada para este gênero ainda.</p>';
+    }
+    contentPlaceholder.innerHTML = html;
+}
+
+/**
+ * Busca os detalhes de uma SÉRIE específica e desenha a página
+ */
+async function loadSingleSerieContent() {
+    const contentPlaceholder = document.getElementById('serie-details-content-placeholder');
+    if (!contentPlaceholder) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const serieId = params.get('id');
+
+    if (!serieId) {
+        contentPlaceholder.innerHTML = `<div class="error-message"><h1>Série não encontrada</h1></div>`;
+        return;
+    }
+
+    // Busca a série E seus gêneros relacionados
+    const { data: serie, error } = await supabase
+        .from('series')
+        .select(`
+            *,
+            generos ( id, nome, slug )
+        `)
+        .eq('id', serieId)
+        .single();
+
+    if (error || !serie) {
+        console.error('Erro ao buscar detalhes da série:', error);
+        contentPlaceholder.innerHTML = `<div class="error-message"><h1>Série não encontrada</h1></div>`;
+        return;
+    }
+
+    // Busca Séries Semelhantes (lógica idêntica à de filmes)
+    let seriesSemelhantesHTML = '';
+    if (serie.generos && serie.generos.length > 0) {
+        const primeiroGeneroId = serie.generos[0].id;
+        const { data: semelhantes } = await supabase
+            .from('serie_genero')
+            .select(`series ( id, titulo, capa_url )`)
+            .eq('genero_id', primeiroGeneroId)
+            .neq('serie_id', serieId)
+            .limit(6);
+        
+        if (semelhantes && semelhantes.length > 0) {
+            for (const item of semelhantes) {
+                const sem = item.series; 
+                if(sem) {
+                    seriesSemelhantesHTML += `
+                        <a href="single-serie.html?id=${sem.id}" class="sidebar-movie-item">
+                            <img src="${sem.capa_url}" alt="Pôster de ${sem.titulo}">
+                            <div class="sidebar-movie-title">${sem.titulo}</div>
+                        </a>
+                    `;
+                }
+            }
+        }
+    }
+
+    const generosHTML = serie.generos.map(g => `<a href="arquivo-genero-serie.html?slug=${g.slug}">${g.nome}</a>`).join(', ');
+    const sinopseHTML = serie.sinopse ? serie.sinopse.replace(/\n/g, '<br>') : 'Sinopse não disponível.';
+    const trailerHTML = serie.trailer_url ? `
+        <div class="trailer-section">
+            <h2>Trailer</h2>
+            <div class="video-container">
+                <iframe src="${getYoutubeEmbedUrl(serie.trailer_url)}" frameborder="0" allowfullscreen></iframe>
+            </div>
+        </div>
+    ` : '';
+
+    // "Desenha" o HTML final
+    const serieHTML = `
+        <div class="main-and-sidebar-container">
+            <div class="main-content">
+                <div class="movie-details-container">
+                    <div class="movie-poster">
+                        <img src="${serie.capa_url}" alt="Pôster de ${serie.titulo}">
+                    </div>
+                    <div class="movie-info">
+                        <h1>${serie.titulo}</h1>
+                        <p class="movie-sinopse">${sinopseHTML}</p>
+                        <ul class="tech-specs">
+                            <li><strong>IMDb:</strong> ${serie.imdb_rating || 'N/A'}</li>
+                            <li><strong>Ano:</strong> ${serie.ano_lancamento || 'N/A'}</li>
+                            <li><strong>Gênero:</strong> ${generosHTML || 'N/A'}</li>
+                            <li><strong>Formato:</strong> ${serie.formato || 'N/A'}</li>
+                            <li><strong>Qualidade:</strong> ${serie.qualidade || 'N/A'}</li>
+                            <li><strong>Áudio:</strong> ${serie.audio || 'N/A'}</li>
+                            <li><strong>Tamanho:</strong> ${serie.tamanho || 'N/A'}</li>
+                        </ul>
+                        <div class="download-buttons">
+                            <a href="${serie.link_encurtado}" target="_blank" class="btn-download primary">Download (Encurtado)</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <aside class="sidebar">
+                <h3 class="sidebar-title">Séries Semelhantes</h3>
+                <div class="sidebar-movie-list">
+                    ${seriesSemelhantesHTML || '<p style="color: var(--cor-texto-secundario);">Nenhuma série semelhante encontrada.</p>'}
+                </div>
+            </aside>
+        </div>
+        ${trailerHTML}
+    `;
+    
+    contentPlaceholder.innerHTML = serieHTML;
+    document.title = `ColmeiaTorrent - ${serie.titulo}`;
+}
+
+/**
  * Busca e desenha a página de um gênero específico, com paginação
  */
-async function loadArquivoGeneroContent() {
+async function loadArquivoGeneroFilmeContent() {
     const contentPlaceholder = document.getElementById('archive-content-placeholder');
     if (!contentPlaceholder) return;
     contentPlaceholder.innerHTML = `<p style="text-align: center; color: var(--cor-texto-secundario);">Carregando gênero...</p>`;
@@ -532,9 +731,9 @@ async function loadArquivoGeneroContent() {
         html += '</div>';
 
         // 7. Desenha a Paginação
-        if (totalPaginas > 1) {
-            html += '<nav class="pagination"><ul>';
-            const baseUrl = `arquivo-genero.html?slug=${slug}`;
+            if (totalPaginas > 1) {
+                html += '<nav class="pagination"><ul>';
+                const baseUrl = `arquivo-genero-filme.html?slug=${slug}`; // <-- CORRIGIDO!
 
             if (currentPage > 1) {
                 html += `<li><a href="${baseUrl}&pagina=${currentPage - 1}">&laquo; Anterior</a></li>`;
