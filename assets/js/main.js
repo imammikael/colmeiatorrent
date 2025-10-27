@@ -71,28 +71,66 @@ function loadPageContent() {
 }
 
 /**
- * Busca e preenche o menu de categorias (chamado por loadLayoutAndInitScripts)
+ * Busca e preenche o menu de GÊNEROS DE FILMES
  */
-async function loadCategoriesMenu() {
-    const menuContainer = document.getElementById('category-menu-placeholder');
+async function loadMovieCategoriesMenu() {
+    const menuContainer = document.getElementById('movie-category-menu');
     if (!menuContainer) return; 
 
+    // Busca apenas gêneros que estão sendo usados por filmes
     const { data: generos, error } = await supabase
         .from('generos')
-        .select('nome, slug')
+        .select(`
+            nome, slug,
+            filme_genero!inner(filme_id)
+        `)
         .order('nome', { ascending: true });
 
     if (error) {
-        console.error('Erro ao buscar gêneros:', error);
+        console.error('Erro ao buscar gêneros de filmes:', error);
         menuContainer.innerHTML = '<li><a href="#">Erro</a></li>';
         return;
     }
 
     let menuHTML = '';
-    for (const genero of generos) {
-        menuHTML += `<li><a href="arquivo-genero.html?slug=${genero.slug}">${genero.nome}</a></li>`;
+    // Filtra para garantir que não haja duplicatas
+    const generosUnicos = [...new Map(generos.map(item => [item.slug, item])).values()];
+    
+    for (const genero of generosUnicos) {
+        menuHTML += `<li><a href="arquivo-genero-filme.html?slug=${genero.slug}">${genero.nome}</a></li>`;
     }
-    menuContainer.innerHTML = menuHTML;
+    menuContainer.innerHTML = menuHTML || '<li><a href="#">Vazio</a></li>';
+}
+
+/**
+ * Busca e preenche o menu de GÊNEROS DE SÉRIES
+ */
+async function loadTvCategoriesMenu() {
+    const menuContainer = document.getElementById('tv-category-menu');
+    if (!menuContainer) return; 
+
+    // Busca apenas gêneros que estão sendo usados por séries
+    const { data: generos, error } = await supabase
+        .from('generos')
+        .select(`
+            nome, slug,
+            serie_genero!inner(serie_id)
+        `)
+        .order('nome', { ascending: true });
+
+    if (error) {
+        console.error('Erro ao buscar gêneros de séries:', error);
+        menuContainer.innerHTML = '<li><a href="#">Erro</a></li>';
+        return;
+    }
+
+    let menuHTML = '';
+    const generosUnicos = [...new Map(generos.map(item => [item.slug, item])).values()];
+
+    for (const genero of generosUnicos) {
+        menuHTML += `<li><a href="arquivo-genero-serie.html?slug=${genero.slug}">${genero.nome}</a></li>`;
+    }
+    menuContainer.innerHTML = menuHTML || '<li><a href="#">Vazio</a></li>';
 }
 
 /**
@@ -327,7 +365,7 @@ async function loadSingleFilmeContent() {
 
     // 4. Prepara os dados para o HTML
     const generosHTML = filme.generos.map(g => 
-        `<a href="arquivo-genero.html?slug=${g.slug}">${g.nome}</a>`
+        `<a href="arquivo-genero-filme.html?slug=${g.slug}">${g.nome}</a>`
     ).join(', ');
     
     const sinopseHTML = filme.sinopse ? filme.sinopse.replace(/\n/g, '<br>') : 'Sinopse não disponível.';
@@ -631,8 +669,8 @@ function htmlspecialchars(str) {
 // --- FUNÇÕES DE INICIALIZAÇÃO DE JS ---
 
 function initHeaderJavaScript() {
-    // Chama a função para preencher o menu de categorias
-    loadCategoriesMenu();
+    loadMovieCategoriesMenu(); // Carrega o menu de filmes
+    loadTvCategoriesMenu(); // Carrega o menu de séries
 
     const searchToggle = document.querySelector('.search-toggle');
     const searchContainer = document.querySelector('.search-container');
