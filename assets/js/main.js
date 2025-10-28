@@ -408,10 +408,10 @@ async function loadSingleFilmeContent() {
                         <ul class="tech-specs">
                             <li><strong>IMDb:</strong> ${filme.imdb_rating || 'N/A'}</li>
                             <li><strong>Ano:</strong> ${filme.ano_lancamento || 'N/A'}</li>
-                            <li><strong>Gênero:</strong> ${generosHTML || 'N/A'}</li>
+                            <li><strong>Gênero(s):</strong> ${generosHTML || 'N/A'}</li>
                             <li><strong>Formato:</strong> ${filme.formato || 'N/A'}</li>
                             <li><strong>Qualidade:</strong> ${filme.qualidade || 'N/A'}</li>
-                            <li><strong>Áudio:</strong> ${filme.audio || 'N/A'}</li>
+                            <li><strong>Áudio(s):</strong> ${filme.audio || 'N/A'}</li>
                             <li><strong>Tamanho:</strong> ${filme.tamanho || 'N/A'}</li>
                             <li><strong>Duração:</strong> ${formatarDuracao(filme.duracao_min)}</li>
                             <li><strong>Qualidade de Vídeo:</strong> ${filme.qualidade_video || 'N/A'}</li>
@@ -607,10 +607,10 @@ async function loadSingleSerieContent() {
                     <ul class="tech-specs">
                         <li><strong>IMDb:</strong> ${serie.imdb_rating || 'N/A'}</li>
                         <li><strong>Ano:</strong> ${serie.ano_lancamento || 'N/A'}</li>
-                        <li><strong>Gênero:</strong> ${generosHTML || 'N/A'}</li>
+                        <li><strong>Gênero(s):</strong> ${generosHTML || 'N/A'}</li>
                         <li><strong>Formato:</strong> ${serie.formato || 'N/A'}</li>
                         <li><strong>Qualidade:</strong> ${serie.qualidade || 'N/A'}</li>
-                        <li><strong>Áudio:</strong> ${serie.audio || 'N/A'}</li>
+                        <li><strong>Áudio(s):</strong> ${serie.audio || 'N/A'}</li>
                         <li><strong>Tamanho:</strong> ${serie.tamanho || 'N/A'}</li>
                     </ul>
                     <div class="download-buttons">
