@@ -1097,6 +1097,8 @@ function initSwiperCarousels() {
     carousels.forEach(carousel => {
         // Para cada um, cria uma nova instância do Swiper
         new Swiper(carousel, {
+            loop: true, // <-- ADICIONE ESTA LINHA MÁGICA
+
             // Quantos slides mostrar
             slidesPerView: 2, // Começa com 2 no mobile
             spaceBetween: 10,
