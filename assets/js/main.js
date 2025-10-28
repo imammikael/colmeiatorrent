@@ -923,16 +923,18 @@ function initHeaderJavaScript() {
         });
     }
 
-    // --- CÓDIGO CORRIGIDO/ADICIONADO ABAIXO ---
-    // Lógica para abrir o dropdown de Categorias no Mobile
-    const dropdownToggle = document.querySelector('.main-nav .dropdown > a');
-    if (dropdownToggle) {
-        dropdownToggle.addEventListener('click', function(event) {
-            // Só executa a ação de 'abrir' se estivermos no modo mobile
-            if (window.innerWidth <= 992) {
-                event.preventDefault(); // Impede o link de navegar para '#'
-                this.parentElement.classList.toggle('open'); // Adiciona/remove a classe .open no <li> pai
-            }
+    // --- Lógica para abrir o dropdown de Categorias no Mobile (CORRIGIDO) ---
+    const dropdownToggles = document.querySelectorAll('.main-nav .dropdown > a'); // MUDOU PARA querySelectorAll
+    if (dropdownToggles) {
+        // MUDOU PARA um loop forEach para aplicar em TODOS os dropdowns
+        dropdownToggles.forEach(toggle => { 
+            toggle.addEventListener('click', function(event) {
+                // Só executa a ação de 'abrir' se estivermos no modo mobile
+                if (window.innerWidth <= 992) {
+                    event.preventDefault(); // Impede o link de navegar para '#'
+                    this.parentElement.classList.toggle('open'); // Adiciona/remove a classe .open no <li> pai
+                }
+            });
         });
     }
     // --- FIM DA CORREÇÃO ---
