@@ -1378,3 +1378,45 @@ body.header-is-sticky .global-header {
     /* COMO VOCÊ PEDIU: SEM ANIMAÇÃO DE ENTRADA */
     animation: none; 
 }
+
+/* --- Estilos dos Badges do Live Search --- */
+.live-search-item {
+    justify-content: space-between;
+    align-items: center;
+}
+.live-search-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    /* Garante que o texto não vaze do container */
+    overflow: hidden; 
+    flex-grow: 1; /* Faz esta div ocupar o espaço */
+    margin-left: 15px; /* (Substitui o 'gap' do pai) */
+}
+.live-search-item .title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Adiciona "..." se o título for muito longo */
+}
+.live-search-badge {
+    font-size: 0.7rem;
+    font-weight: bold;
+    padding: 3px 6px;
+    border-radius: 4px;
+    align-self: flex-start; /* Alinha o badge no início */
+    text-transform: uppercase;
+}
+.live-search-badge.filme {
+    background-color: var(--cor-destaque);
+    color: var(--cor-fundo);
+}
+.live-search-badge.serie {
+    background-color: #5bc0de; /* Um azul para diferenciar */
+    color: var(--cor-fundo);
+}
+
+/* Garante que o CSS antigo não entre em conflito */
+.live-search-item img {
+    margin-left: 0;
+    flex-shrink: 0;
+}

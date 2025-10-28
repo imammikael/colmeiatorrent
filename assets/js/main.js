@@ -723,105 +723,89 @@ async function loadArquivoGeneroFilmeContent() {
 }
 
 /**
- * Busca filmes no Supabase e desenha a página de resultados
+ * Busca filmes E SÉRIES no Supabase e desenha a página de resultados
  */
 async function loadSearchResultsContent(searchQuery) {
-    // 1. Prepara os containers
+    // 1. Prepara os containers (sem alterações)
     const homeContent = document.getElementById('home-content');
     const resultsContainer = document.getElementById('search-results-container');
     if (!homeContent || !resultsContainer) return;
 
-    // Esconde a home, mostra os resultados
     homeContent.style.display = 'none';
     resultsContainer.style.display = 'block';
-    resultsContainer.innerHTML = `<p style="text-align: center; color: var(--cor-texto-secundario);">Buscando por "${searchQuery}"...</p>`;
+    resultsContainer.innerHTML = `<p style="text-align: center; color: var(--cor-texto-secundario);">Buscando por "${htmlspecialchars(searchQuery)}"...</p>`;
 
-    // 2. Prepara a busca "inteligente" (Full-Text Search)
-    // Converte "vingadores ultimato" em "vingadores & ultimato"
-    const searchWords = searchQuery.split(' ').filter(Boolean).join(' & ');
-
-    // 3. Prepara a Paginação
+    // 2. Prepara a Paginação (sem alterações)
     const params = new URLSearchParams(window.location.search);
     const currentPage = parseInt(params.get('pagina') || '1', 10);
     const filmesPorPagina = 18;
     const offset = (currentPage - 1) * filmesPorPagina;
 
-    // 4. FAZ A CONSULTA AO SUPABASE
-    // Primeiro, conta o total de resultados
-    const { count, error: countError } = await supabase
-        .from('filmes')
-        .select('id', { count: 'exact', head: true })
-        .textSearch('titulo', searchWords); // A busca inteligente!
+    // 3. FAZ A CONSULTA AO SUPABASE (USANDO RPC)
+
+    // Primeiro, chama a função de CONTAGEM
+    const { data: totalCount, error: countError } = await supabase.rpc('contar_busca_conteudo', {
+        query_text: searchQuery
+    });
 
     if (countError) {
-         console.error('Erro ao contar busca:', countError);
-         resultsContainer.innerHTML = `<p>Erro ao buscar resultados.</p>`;
-         return;
-    }
-
-    const totalFilmes = count || 0;
-    const totalPaginas = Math.ceil(totalFilmes / filmesPorPagina);
-
-    // Agora, busca os filmes da página atual
-    const { data: filmes, error: filmesError } = await supabase
-        .from('filmes')
-        .select('id, titulo, capa_url')
-        .textSearch('titulo', searchWords)
-        .order('data_adicionado', { ascending: false })
-        .range(offset, offset + filmesPorPagina - 1);
-
-    if (filmesError) {
-        console.error('Erro ao buscar filmes:', filmesError);
-        resultsContainer.innerHTML = `<p>Erro ao buscar resultados.</p>`;
+        console.error('Erro ao contar busca:', countError);
+        resultsContainer.innerHTML = `<p>Erro ao buscar resultados (contagem).</p>`;
         return;
     }
 
-    // 5. "Desenha" o HTML dos Resultados
+    const totalFilmes = totalCount || 0;
+    const totalPaginas = Math.ceil(totalFilmes / filmesPorPagina);
+
+    // Agora, busca os itens da página
+    const { data: items, error: itemsError } = await supabase.rpc('buscar_conteudo', {
+        query_text: searchQuery,
+        page_limit: filmesPorPagina,
+        page_offset: offset
+    });
+
+    if (itemsError) {
+        console.error('Erro ao buscar itens:', itemsError);
+        resultsContainer.innerHTML = `<p>Erro ao buscar resultados (itens).</p>`;
+        return;
+    }
+
+    // 4. "Desenha" o HTML dos Resultados
     let html = '';
     html += `<h1 class="page-title">Resultados da Busca por: "${htmlspecialchars(searchQuery)}"</h1>`;
-    html += `<p style="color: var(--cor-texto-secundario); margin-top: -20px; margin-bottom: 30px;">${totalFilmes} filme(s) encontrado(s).</p>`;
+    html += `<p style="color: var(--cor-texto-secundario); margin-top: -20px; margin-bottom: 30px;">${totalFilmes} resultado(s) encontrado(s).</p>`;
 
-    // (Aqui adicionaremos os filtros no futuro)
-
-    if (filmes.length > 0) {
+    if (items.length > 0) {
         html += '<div class="shelf-grid">';
-        for (const filme of filmes) {
+        for (const item of items) {
+            // A MÁGICA: Define o link correto (filme ou série)
+            const link = (item.tipo === 'filme') 
+                ? `single-filme.html?id=${item.id}` 
+                : `single-serie.html?id=${item.id}`;
+
             html += `
-                <a href="single-filme.html?id=${filme.id}" class="movie-card">
-                    <img src="${filme.capa_url}" alt="Pôster de ${filme.titulo}">
-                    <div class="card-overlay"><h3 class="card-title">${filme.titulo}</h3></div>
+                <a href="${link}" class="movie-card">
+                    <img src="${item.capa_url}" alt="Pôster de ${item.titulo}">
+                    <div class="card-overlay"><h3 class="card-title">${item.titulo}</h3></div>
                 </a>
             `;
         }
         html += '</div>';
     } else {
-        html += '<p>Nenhum filme encontrado com este termo.</p>';
+        html += '<p>Nenhum filme ou série encontrado com este termo.</p>';
     }
 
-    // 6. Desenha a Paginação
+    // 5. Desenha a Paginação (sem alterações)
     if (totalPaginas > 1) {
         html += '<nav class="pagination"><ul>';
         const baseUrl = `index.html?q=${encodeURIComponent(searchQuery)}`;
-
-        // Botão "Anterior"
-        if (currentPage > 1) {
-            html += `<li><a href="${baseUrl}&pagina=${currentPage - 1}">&laquo; Anterior</a></li>`;
-        }
-        // Links das páginas
-        for (let i = 1; i <= totalPaginas; i++) {
-            html += `<li class="${i === currentPage ? 'active' : ''}"><a href="${baseUrl}&pagina=${i}">${i}</a></li>`;
-        }
-        // Botão "Próximo"
-        if (currentPage < totalPaginas) {
-            html += `<li><a href="${baseUrl}&pagina=${currentPage + 1}">Próximo &raquo;</a></li>`;
-        }
+        if (currentPage > 1) { html += `<li><a href="${baseUrl}&pagina=${currentPage - 1}">&laquo; Anterior</a></li>`; }
+        for (let i = 1; i <= totalPaginas; i++) { html += `<li class="${i === currentPage ? 'active' : ''}"><a href="${baseUrl}&pagina=${i}">${i}</a></li>`; }
+        if (currentPage < totalPaginas) { html += `<li><a href="${baseUrl}&pagina=${currentPage + 1}">Próximo &raquo;</a></li>`; }
         html += '</ul></nav>';
     }
 
-    // 7. Injeta o HTML final na página
     resultsContainer.innerHTML = html;
-
-    // 8. Atualiza o Título da Aba
     document.title = `Busca: ${searchQuery} - ColmeiaTorrent`;
 }
 
@@ -852,77 +836,69 @@ function initHeaderJavaScript() {
         searchCloseBtn.addEventListener('click', closeSearch);
         document.addEventListener('keydown', (event) => { if (searchContainer.classList.contains('active') && event.key === 'Escape') { closeSearch(); } });
 
-        // --- INÍCIO DA NOVA LÓGICA DE LIVE SEARCH ---
-        
-        let debounceTimeout; // Variável para o timer do debounce
-
+        // --- LÓGICA DE LIVE SEARCH (ATUALIZADA) ---
+        let debounceTimeout;
         searchBar.addEventListener('input', () => {
-            // 1. Limpa qualquer timer anterior a cada tecla digitada
             clearTimeout(debounceTimeout);
-
             const query = searchBar.value.trim();
 
-            // 2. Se a busca estiver vazia ou muito curta, limpa os resultados
             if (query.length < 2) {
                 liveSearchResults.innerHTML = '';
-                liveSearchResults.style.display = 'none'; // Esconde o container
+                liveSearchResults.style.display = 'none';
                 return;
             }
 
-            // 3. Inicia um novo timer (300ms)
-            // Só vamos fazer a busca quando o usuário parar de digitar
             debounceTimeout = setTimeout(async () => {
                 try {
-                    // 4. Prepara a busca "inteligente" (ex: "vinga ulti" -> "vinga & ulti")
-                    const searchWords = query.split(' ').filter(Boolean).join(' & ');
+                    // Chama a nova função RPC com limite de 5
+                    const { data: items, error } = await supabase.rpc('buscar_conteudo', {
+                        query_text: query,
+                        page_limit: 5,
+                        page_offset: 0
+                    });
 
-                    // 5. Faz a consulta ao Supabase (limitada a 5 resultados)
-                    const { data: filmes, error } = await supabase
-                        .from('filmes')
-                        .select('id, titulo, capa_url')
-                        .textSearch('titulo', searchWords)
-                        .order('data_adicionado', { ascending: false }) // Opcional: ordenar por relevância
-                        .limit(5); // Só queremos alguns resultados rápidos
+                    if (error) { throw error; }
 
-                    if (error) { throw error; } // Joga o erro para o catch
-
-                    // 6. Limpa os resultados antigos e prepara para desenhar os novos
                     liveSearchResults.innerHTML = '';
 
-                    if (filmes.length > 0) {
-                        // "Desenha" o HTML dos resultados
-                        filmes.forEach(filme => {
-                            const item = document.createElement('a');
-                            item.href = `single-filme.html?id=${filme.id}`;
-                            item.classList.add('live-search-item');
+                    if (items.length > 0) {
+                        items.forEach(item => {
+                            // Define o link correto (filme ou série)
+                            const link = (item.tipo === 'filme') 
+                                ? `single-filme.html?id=${item.id}` 
+                                : `single-serie.html?id=${item.id}`;
 
-                            const img = document.createElement('img');
-                            img.src = filme.capa_url;
-                            img.alt = ""; // Decorativo
+                            const itemEl = document.createElement('a');
+                            itemEl.href = link;
+                            itemEl.classList.add('live-search-item');
 
-                            const title = document.createElement('span');
-                            title.classList.add('title');
-                            title.textContent = filme.titulo; // Mais seguro que innerHTML
+                            // Adiciona o badge (Filme/Série)
+                            const tipoBadge = (item.tipo === 'filme')
+                                ? '<span class="live-search-badge filme">Filme</span>'
+                                : '<span class="live-search-badge serie">Série</span>';
 
-                            item.appendChild(img);
-                            item.appendChild(title);
-                            liveSearchResults.appendChild(item);
+                            itemEl.innerHTML = `
+                                <img src="${item.capa_url}" alt="">
+                                <div class="live-search-info">
+                                    <span class="title">${item.titulo}</span>
+                                    ${tipoBadge}
+                                </div>
+                            `;
+                            liveSearchResults.appendChild(itemEl);
                         });
-                        liveSearchResults.style.display = 'block'; // Mostra o container
+                        liveSearchResults.style.display = 'block';
                     } else {
-                        // 7. Mostra a mensagem de "Nenhum resultado"
-                        liveSearchResults.innerHTML = '<div class="no-results">Nenhum filme encontrado.</div>';
-                        liveSearchResults.style.display = 'block'; // Mostra o container
+                        liveSearchResults.innerHTML = '<div class="no-results">Nenhum filme ou série encontrado.</div>';
+                        liveSearchResults.style.display = 'block';
                     }
-
                 } catch (error) {
                     console.error('Erro na busca ao vivo:', error);
                     liveSearchResults.innerHTML = '<div class="no-results">Erro ao buscar.</div>';
                     liveSearchResults.style.display = 'block';
                 }
-            }, 300); // 300 milissegundos de espera
+            }, 300);
         });
-        // --- FIM DA NOVA LÓGICA DE LIVE SEARCH ---
+        // --- FIM DA LÓGICA DE LIVE SEARCH ---
     }
 
     const hamburgerMenu = document.querySelector('.hamburger-menu');
