@@ -204,100 +204,122 @@ async function loadHeroBanner(bannerPlaceholder) {
 }
 
 /**
- * Busca e desenha TODAS as prateleiras de filmes em paralelo
+ * Busca e desenha TODAS as prateleiras de filmes E SÉRIES em paralelo
  */
 async function loadAllShelves(prateleirasContainer) {
     if (!prateleirasContainer) return;
-    // Mostra um carregamento inicial
     prateleirasContainer.innerHTML = "<p style='text-align: center; color: var(--cor-texto-secundario);'>Carregando prateleiras...</p>";
 
     try {
         const anoAtual = new Date().getFullYear();
 
-        // 1. Define todas as "promessas" de busca
-        const promessaUltimos = supabase.from('filmes').select('id, titulo, capa_url').order('data_adicionado', { ascending: false }).limit(6);
-        const promessaEmAlta = supabase.from('filmes').select('id, titulo, capa_url').order('downloads', { ascending: false }).limit(6);
-        const promessaLancamentos = supabase.from('filmes').select('id, titulo, capa_url').eq('ano_lancamento', anoAtual).limit(6);
+        // --- 1. Define as "promessas" de busca (Filmes) ---
+        const p_ultimosFilmes = supabase.from('filmes').select('id, titulo, capa_url').order('data_adicionado', { ascending: false }).limit(6);
+        const p_filmesEmAlta = supabase.from('filmes').select('id, titulo, capa_url').order('downloads', { ascending: false }).limit(6);
+        const p_filmesLancamentos = supabase.from('filmes').select('id, titulo, capa_url').eq('ano_lancamento', anoAtual).limit(6);
+        const p_filmesAcao = supabase.from('filmes').select('id, titulo, capa_url, generos!inner(slug)').eq('generos.slug', 'acao').limit(6);
+        const p_filmesTerrorSuspense = supabase.from('filmes').select('id, titulo, capa_url, generos!inner(slug)').in('generos.slug', ['terror', 'suspense']).limit(6);
+        const p_filmesClassicos = supabase.from('filmes').select('id, titulo, capa_url').lt('ano_lancamento', 2000).order('imdb_rating', { ascending: false }).limit(6);
 
-        // Busca filmes que contenham o gênero 'acao'
-        const promessaAcao = supabase.from('filmes').select('id, titulo, capa_url, generos!inner(slug)').eq('generos.slug', 'acao').limit(6);
+        // --- 2. Define as "promessas" de busca (Séries) ---
+        const p_ultimasSeries = supabase.from('series').select('id, titulo, capa_url').order('data_adicionado', { ascending: false }).limit(6);
+        const p_seriesEmAlta = supabase.from('series').select('id, titulo, capa_url').order('downloads', { ascending: false }).limit(6);
 
-        // Busca filmes que contenham 'terror' OU 'suspense'
-        const promessaTerrorSuspense = supabase.from('filmes').select('id, titulo, capa_url, generos!inner(slug)').in('generos.slug', ['terror', 'suspense']).limit(6);
-
-        // Busca clássicos (antes de 2000) ordenados por nota
-        const promessaClassicos = supabase.from('filmes').select('id, titulo, capa_url').lt('ano_lancamento', 2000).order('imdb_rating', { ascending: false }).limit(6);
-
-        // 2. Executa todas as buscas ao MESMO TEMPO (em paralelo)
+        // 3. Executa TODAS as 8 buscas ao MESMO TEMPO
         const [
             { data: ultimosFilmes },
             { data: filmesEmAlta },
             { data: filmesLancamentos },
             { data: filmesAcao },
             { data: filmesTerrorSuspense },
-            { data: filmesClassicos }
+            { data: filmesClassicos },
+            { data: ultimasSeries },
+            { data: seriesEmAlta }
         ] = await Promise.all([
-            promessaUltimos,
-            promessaEmAlta,
-            promessaLancamentos,
-            promessaAcao,
-            promessaTerrorSuspense,
-            promessaClassicos
+            p_ultimosFilmes,
+            p_filmesEmAlta,
+            p_filmesLancamentos,
+            p_filmesAcao,
+            p_filmesTerrorSuspense,
+            p_filmesClassicos,
+            p_ultimasSeries,
+            p_seriesEmAlta
         ]);
 
-        // 3. "Desenha" o HTML final
+        // 4. "Desenha" o HTML final
         let prateleirasHTML = '';
-
+        
+        // Prateleiras de Filmes
         if (ultimosFilmes && ultimosFilmes.length > 0) {
-            prateleirasHTML += createShelfHTML('Últimos Filmes Adicionados', ultimosFilmes);
+            prateleirasHTML += createShelfHTML('Últimos Filmes Adicionados', ultimosFilmes, 'filme');
         }
         if (filmesEmAlta && filmesEmAlta.length > 0) {
-            prateleirasHTML += createShelfHTML('Em Alta', filmesEmAlta);
+            prateleirasHTML += createShelfHTML('Filmes em Alta', filmesEmAlta, 'filme');
         }
+        
+        // Prateleiras de Séries (Vamos intercalar)
+        if (ultimasSeries && ultimasSeries.length > 0) {
+            prateleirasHTML += createShelfHTML('Últimas Séries Adicionadas', ultimasSeries, 'serie');
+        }
+        if (seriesEmAlta && seriesEmAlta.length > 0) {
+            prateleirasHTML += createShelfHTML('Séries em Alta', seriesEmAlta, 'serie');
+        }
+        
+        // Restante dos Filmes
         if (filmesLancamentos && filmesLancamentos.length > 0) {
-            prateleirasHTML += createShelfHTML(`Lançamentos ${anoAtual}`, filmesLancamentos);
+            prateleirasHTML += createShelfHTML(`Lançamentos ${anoAtual}`, filmesLancamentos, 'filme');
         }
         if (filmesAcao && filmesAcao.length > 0) {
-            prateleirasHTML += createShelfHTML('Ação em Destaque', filmesAcao);
+            prateleirasHTML += createShelfHTML('Ação em Destaque', filmesAcao, 'filme');
         }
         if (filmesTerrorSuspense && filmesTerrorSuspense.length > 0) {
-            // Remove duplicatas caso um filme seja de terror E suspense
             const filmesUnicos = Array.from(new Map(filmesTerrorSuspense.map(filme => [filme.id, filme])).values());
-            prateleirasHTML += createShelfHTML('Terror e Suspense', filmesUnicos);
+            prateleirasHTML += createShelfHTML('Terror e Suspense', filmesUnicos, 'filme');
         }
         if (filmesClassicos && filmesClassicos.length > 0) {
-            prateleirasHTML += createShelfHTML('Clássicos que Nunca Envelhecem', filmesClassicos);
+            prateleirasHTML += createShelfHTML('Clássicos que Nunca Envelhecem', filmesClassicos, 'filme');
         }
 
-        // 4. Injeta o HTML na página
+        // 5. Injeta o HTML na página
         if (prateleirasHTML === '') {
-            prateleirasContainer.innerHTML = "<p>Nenhum filme adicionado ainda.</p>";
+            prateleirasContainer.innerHTML = "<p>Nenhum filme ou série adicionado ainda.</p>";
         } else {
             prateleirasContainer.innerHTML = prateleirasHTML;
         }
 
     } catch (error) {
         console.error('Erro ao carregar prateleiras:', error);
-        prateleirasContainer.innerHTML = "<p>Erro ao carregar filmes.</p>";
+        prateleirasContainer.innerHTML = "<p>Erro ao carregar conteúdo.</p>";
     }
 }
 
-function createShelfHTML(titulo, filmes) {
+/**
+ * Função auxiliar para desenhar o HTML de uma prateleira (agora para filmes OU séries)
+ * @param {string} titulo - O título da prateleira
+ * @param {Array} items - O array de filmes ou séries
+ * @param {string} tipo - 'filme' ou 'serie'
+ */
+function createShelfHTML(titulo, items, tipo) {
+    // Define para qual página o link deve apontar
+    const linkPagina = (tipo === 'serie') ? 'single-serie.html' : 'single-filme.html';
+
     let html = `
         <section class="content-shelf">
             <h2 class="shelf-title">${titulo}</h2>
             <div class="shelf-grid">
     `;
-    for (const filme of filmes) {
+
+    for (const item of items) {
         html += `
-            <a href="single-filme.html?id=${filme.id}" class="movie-card">
-                <img src="${filme.capa_url}" alt="Pôster de ${filme.titulo}">
+            <a href="${linkPagina}?id=${item.id}" class="movie-card">
+                <img src="${item.capa_url}" alt="Pôster de ${item.titulo}">
                 <div class="card-overlay">
-                    <h3 class="card-title">${filme.titulo}</h3>
+                    <h3 class="card-title">${item.titulo}</h3>
                 </div>
             </a>
         `;
     }
+
     html += '</div></section>';
     return html;
 }
