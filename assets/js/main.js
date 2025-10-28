@@ -204,7 +204,7 @@ async function loadHeroBanner(bannerPlaceholder) {
 }
 
 /**
- * Busca e desenha TODAS as prateleiras de filmes E SÉRIES em paralelo
+ * Busca e desenha TODAS as prateleiras de filmes E SÉRIES (agora com 18 itens)
  */
 async function loadAllShelves(prateleirasContainer) {
     if (!prateleirasContainer) return;
@@ -212,18 +212,19 @@ async function loadAllShelves(prateleirasContainer) {
 
     try {
         const anoAtual = new Date().getFullYear();
+        const limiteItens = 18; // Buscamos 18, como você pediu
 
-        // --- 1. Define as "promessas" de busca (Filmes) ---
-        const p_ultimosFilmes = supabase.from('filmes').select('id, titulo, capa_url').order('data_adicionado', { ascending: false }).limit(6);
-        const p_filmesEmAlta = supabase.from('filmes').select('id, titulo, capa_url').order('downloads', { ascending: false }).limit(6);
-        const p_filmesLancamentos = supabase.from('filmes').select('id, titulo, capa_url').eq('ano_lancamento', anoAtual).limit(6);
-        const p_filmesAcao = supabase.from('filmes').select('id, titulo, capa_url, generos!inner(slug)').eq('generos.slug', 'acao').limit(6);
-        const p_filmesTerrorSuspense = supabase.from('filmes').select('id, titulo, capa_url, generos!inner(slug)').in('generos.slug', ['terror', 'suspense']).limit(6);
-        const p_filmesClassicos = supabase.from('filmes').select('id, titulo, capa_url').lt('ano_lancamento', 2000).order('imdb_rating', { ascending: false }).limit(6);
+        // 1. Define as "promessas" de busca (Filmes)
+        const p_ultimosFilmes = supabase.from('filmes').select('id, titulo, capa_url').order('data_adicionado', { ascending: false }).limit(limiteItens);
+        const p_filmesEmAlta = supabase.from('filmes').select('id, titulo, capa_url').order('downloads', { ascending: false }).limit(limiteItens);
+        const p_filmesLancamentos = supabase.from('filmes').select('id, titulo, capa_url').eq('ano_lancamento', anoAtual).limit(limiteItens);
+        const p_filmesAcao = supabase.from('filmes').select('id, titulo, capa_url, generos!inner(slug)').eq('generos.slug', 'acao').limit(limiteItens);
+        const p_filmesTerrorSuspense = supabase.from('filmes').select('id, titulo, capa_url, generos!inner(slug)').in('generos.slug', ['terror', 'suspense']).limit(limiteItens);
+        const p_filmesClassicos = supabase.from('filmes').select('id, titulo, capa_url').lt('ano_lancamento', 2000).order('imdb_rating', { ascending: false }).limit(limiteItens);
 
-        // --- 2. Define as "promessas" de busca (Séries) ---
-        const p_ultimasSeries = supabase.from('series').select('id, titulo, capa_url').order('data_adicionado', { ascending: false }).limit(6);
-        const p_seriesEmAlta = supabase.from('series').select('id, titulo, capa_url').order('downloads', { ascending: false }).limit(6);
+        // 2. Define as "promessas" de busca (Séries)
+        const p_ultimasSeries = supabase.from('series').select('id, titulo, capa_url').order('data_adicionado', { ascending: false }).limit(limiteItens);
+        const p_seriesEmAlta = supabase.from('series').select('id, titulo, capa_url').order('downloads', { ascending: false }).limit(limiteItens);
 
         // 3. Executa TODAS as 8 buscas ao MESMO TEMPO
         const [
@@ -236,55 +237,33 @@ async function loadAllShelves(prateleirasContainer) {
             { data: ultimasSeries },
             { data: seriesEmAlta }
         ] = await Promise.all([
-            p_ultimosFilmes,
-            p_filmesEmAlta,
-            p_filmesLancamentos,
-            p_filmesAcao,
-            p_filmesTerrorSuspense,
-            p_filmesClassicos,
-            p_ultimasSeries,
-            p_seriesEmAlta
+            p_ultimosFilmes, p_filmesEmAlta, p_filmesLancamentos, p_filmesAcao, p_filmesTerrorSuspense, p_filmesClassicos, p_ultimasSeries, p_seriesEmAlta
         ]);
 
         // 4. "Desenha" o HTML final
         let prateleirasHTML = '';
-        
-        // Prateleiras de Filmes
-        if (ultimosFilmes && ultimosFilmes.length > 0) {
-            prateleirasHTML += createShelfHTML('Últimos Filmes Adicionados', ultimosFilmes, 'filme');
-        }
-        if (filmesEmAlta && filmesEmAlta.length > 0) {
-            prateleirasHTML += createShelfHTML('Filmes em Alta', filmesEmAlta, 'filme');
-        }
-        
-        // Prateleiras de Séries (Vamos intercalar)
-        if (ultimasSeries && ultimasSeries.length > 0) {
-            prateleirasHTML += createShelfHTML('Últimas Séries Adicionadas', ultimasSeries, 'serie');
-        }
-        if (seriesEmAlta && seriesEmAlta.length > 0) {
-            prateleirasHTML += createShelfHTML('Séries em Alta', seriesEmAlta, 'serie');
-        }
-        
-        // Restante dos Filmes
-        if (filmesLancamentos && filmesLancamentos.length > 0) {
-            prateleirasHTML += createShelfHTML(`Lançamentos ${anoAtual}`, filmesLancamentos, 'filme');
-        }
-        if (filmesAcao && filmesAcao.length > 0) {
-            prateleirasHTML += createShelfHTML('Ação em Destaque', filmesAcao, 'filme');
-        }
+
+        if (ultimosFilmes && ultimosFilmes.length > 0) prateleirasHTML += createShelfHTML('Últimos Filmes Adicionados', ultimosFilmes, 'filme');
+        if (filmesEmAlta && filmesEmAlta.length > 0) prateleirasHTML += createShelfHTML('Filmes em Alta', filmesEmAlta, 'filme');
+        if (ultimasSeries && ultimasSeries.length > 0) prateleirasHTML += createShelfHTML('Últimas Séries Adicionadas', ultimasSeries, 'serie');
+        if (seriesEmAlta && seriesEmAlta.length > 0) prateleirasHTML += createShelfHTML('Séries em Alta', seriesEmAlta, 'serie');
+        if (filmesLancamentos && filmesLancamentos.length > 0) prateleirasHTML += createShelfHTML(`Lançamentos ${anoAtual}`, filmesLancamentos, 'filme');
+        if (filmesAcao && filmesAcao.length > 0) prateleirasHTML += createShelfHTML('Ação em Destaque', filmesAcao, 'filme');
         if (filmesTerrorSuspense && filmesTerrorSuspense.length > 0) {
             const filmesUnicos = Array.from(new Map(filmesTerrorSuspense.map(filme => [filme.id, filme])).values());
             prateleirasHTML += createShelfHTML('Terror e Suspense', filmesUnicos, 'filme');
         }
-        if (filmesClassicos && filmesClassicos.length > 0) {
-            prateleirasHTML += createShelfHTML('Clássicos que Nunca Envelhecem', filmesClassicos, 'filme');
-        }
+        if (filmesClassicos && filmesClassicos.length > 0) prateleirasHTML += createShelfHTML('Clássicos que Nunca Envelhecem', filmesClassicos, 'filme');
 
         // 5. Injeta o HTML na página
         if (prateleirasHTML === '') {
             prateleirasContainer.innerHTML = "<p>Nenhum filme ou série adicionado ainda.</p>";
         } else {
             prateleirasContainer.innerHTML = prateleirasHTML;
+
+            // 6. A MÁGICA: CHAMA O INICIALIZADOR DO SWIPER
+            // Somente DEPOIS que o HTML está na página
+            initSwiperCarousels(); 
         }
 
     } catch (error) {
@@ -294,33 +273,45 @@ async function loadAllShelves(prateleirasContainer) {
 }
 
 /**
- * Função auxiliar para desenhar o HTML de uma prateleira (agora para filmes OU séries)
+ * Função auxiliar para desenhar o HTML de uma prateleira (agora como um Carrossel Swiper)
  * @param {string} titulo - O título da prateleira
  * @param {Array} items - O array de filmes ou séries
  * @param {string} tipo - 'filme' ou 'serie'
  */
 function createShelfHTML(titulo, items, tipo) {
-    // Define para qual página o link deve apontar
+    // Gera um ID único para este carrossel (ex: "carousel-ultimos-filmes")
+    const carouselId = 'carousel-' + titulo.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+
     const linkPagina = (tipo === 'serie') ? 'single-serie.html' : 'single-filme.html';
 
     let html = `
         <section class="content-shelf">
             <h2 class="shelf-title">${titulo}</h2>
-            <div class="shelf-grid">
+
+            <div class="shelf-carousel swiper" id="${carouselId}">
+                <div class="swiper-wrapper">
     `;
 
     for (const item of items) {
         html += `
-            <a href="${linkPagina}?id=${item.id}" class="movie-card">
-                <img src="${item.capa_url}" alt="Pôster de ${item.titulo}">
-                <div class="card-overlay">
-                    <h3 class="card-title">${item.titulo}</h3>
-                </div>
-            </a>
+            <div class="swiper-slide">
+                <a href="${linkPagina}?id=${item.id}" class="movie-card">
+                    <img src="${item.capa_url}" alt="Pôster de ${item.titulo}">
+                    <div class="card-overlay">
+                        <h3 class="card-title">${item.titulo}</h3>
+                    </div>
+                </a>
+            </div>
         `;
     }
 
-    html += '</div></section>';
+    html += `
+                </div>
+                <div class="swiper-button-prev"></div>
+                <div class="swiper-button-next"></div>
+            </div>
+        </section>
+    `;
     return html;
 }
 
@@ -1094,6 +1085,49 @@ function initBannerJavaScript() {
         });
     }, { threshold: 0.5 });
     observer.observe(banner);
+}
+
+/**
+ * Inicializa todos os carrosséis Swiper na página
+ */
+function initSwiperCarousels() {
+    // Encontra todos os elementos com a classe .shelf-carousel
+    const carousels = document.querySelectorAll('.shelf-carousel');
+
+    carousels.forEach(carousel => {
+        // Para cada um, cria uma nova instância do Swiper
+        new Swiper(carousel, {
+            // Quantos slides mostrar
+            slidesPerView: 2, // Começa com 2 no mobile
+            spaceBetween: 10,
+
+            // Navegação (as flechas)
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev',
+            },
+
+            // Responsividade: muda o número de slides baseado na largura da tela
+            breakpoints: {
+                640: {
+                    slidesPerView: 3,
+                    spaceBetween: 15
+                },
+                768: {
+                    slidesPerView: 4,
+                    spaceBetween: 15
+                },
+                1024: {
+                    slidesPerView: 5,
+                    spaceBetween: 20
+                },
+                1200: {
+                    slidesPerView: 6, // 6 slides no desktop, como você pediu
+                    spaceBetween: 20
+                }
+            }
+        });
+    });
 }
 
 /**
